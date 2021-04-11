@@ -5,6 +5,11 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from) {
 };
 var canvas = document.querySelector('canvas');
 var c = canvas.getContext('2d');
+var sunState = false;
+document.querySelector('button').onclick = function () {
+    sunState = !sunState;
+    console.log(sunState);
+};
 canvas.width = 1000;
 canvas.height = 600;
 var MOUSE_BUDDIES_DIST = 7;
@@ -27,8 +32,8 @@ var Point = (function () {
         this.radius = radius;
     }
     Point.prototype.set = function (x, y) {
-        this.x = x;
-        this.y = y;
+        this.x = Math.min(x, canvas.width - 10);
+        this.y = Math.min(y, canvas.height - 10);
     };
     Point.prototype.draw = function () {
         c.beginPath();
@@ -160,6 +165,19 @@ var Scene = (function () {
         c.fillStyle = 'black';
         c.fillRect(0, 0, canvas.width, canvas.height);
         this.shapes.forEach(function (s) { return s.draw(); });
+        if (sunState) {
+            var LIMIT = 270;
+            var sunRays = [];
+            for (var i = 1; i <= LIMIT; i++) {
+                var d = 2 * i * (Math.PI / LIMIT);
+                sunRays.push(new Ray(this.mouse, new Point(this.mouse.x + Math.cos(d), this.mouse.y + Math.sin(d))));
+            }
+            var sunPoints = sunRays.map(function (r) { return r.findClosest(_this.shapes); });
+            sunPoints.forEach(function (p) {
+                new Shape([p, _this.mouse]).draw();
+            });
+            return;
+        }
         mouseBuddies.forEach(function (dir, i) {
             var mouseBuddy = new Point(_this.mouse.x + dir[0], _this.mouse.y + dir[1]);
             var rays = _this.shapes.reduce(function (prev, p) { return __spreadArray(__spreadArray([], prev), p.points.reduce(function (prev, c) { return __spreadArray(__spreadArray([], prev), _this.fivePoints(mouseBuddy, c)); }, [])); }, []);
