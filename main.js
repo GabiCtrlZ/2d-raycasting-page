@@ -125,7 +125,8 @@ var Shape = (function () {
             var x = _a.x, y = _a.y;
             return c.lineTo(x, y);
         });
-        c.stroke();
+        if (!withFill)
+            c.stroke();
         if (withFill)
             c.fill();
     };
